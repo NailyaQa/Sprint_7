@@ -1,0 +1,158 @@
+import requests
+import random
+import string
+import allure
+
+
+class TestCreateCourier:
+
+    @allure.title("Создание курьера")
+    @allure.description("Проверка успешного создания курьера и его удаления")
+    def test_create_courier_success(self):
+
+        with allure.step("Генерация данных курьера"):
+            letters = string.ascii_lowercase
+
+            login = ''.join(random.choice(letters) for _ in range(10))
+            password = ''.join(random.choice(letters) for _ in range(10))
+            first_name = ''.join(random.choice(letters) for _ in range(10))
+
+            payload = {
+                "login": login,
+                "password": password,
+                "firstName": first_name
+            }
+
+        with allure.step("Создание курьера"):
+            create_response = requests.post(
+                "https://qa-scooter.praktikum-services.ru/api/v1/courier",
+                data=payload
+            )
+
+        with allure.step("Проверка успешного создания"):
+            assert create_response.status_code == 201
+            assert create_response.json() == {"ok": True}
+
+        with allure.step("Авторизация курьера для получения id"):
+            login_payload = {
+                "login": login,
+                "password": password
+            }
+
+            login_response = requests.post(
+                "https://qa-scooter.praktikum-services.ru/api/v1/courier/login",
+                data=login_payload
+            )
+
+            courier_id = login_response.json()["id"]
+
+        with allure.step("Удаление курьера"):
+            delete_response = requests.delete(
+                f"https://qa-scooter.praktikum-services.ru/api/v1/courier/{courier_id}"
+            )
+
+            assert delete_response.status_code == 200
+
+
+    @allure.title("Нельзя создать дубликат курьера")
+    @allure.description("Проверка ошибки при повторном создании курьера с теми же данными")
+    def test_create_duplicate_courier(self):
+
+        with allure.step("Генерация данных курьера"):
+            letters = string.ascii_lowercase
+
+            login = ''.join(random.choice(letters) for _ in range(10))
+            password = ''.join(random.choice(letters) for _ in range(10))
+            first_name = ''.join(random.choice(letters) for _ in range(10))
+
+            payload = {
+                "login": login,
+                "password": password,
+                "firstName": first_name
+            }
+
+        with allure.step("Первое создание курьера"):
+            first_response = requests.post(
+                "https://qa-scooter.praktikum-services.ru/api/v1/courier",
+                data=payload
+            )
+            assert first_response.status_code == 201
+
+        with allure.step("Попытка создать дубликат"):
+            second_response = requests.post(
+                "https://qa-scooter.praktikum-services.ru/api/v1/courier",
+                data=payload
+            )
+
+            assert second_response.status_code == 409
+
+        with allure.step("Удаление тестового курьера"):
+            login_payload = {
+                "login": login,
+                "password": password
+            }
+
+            login_response = requests.post(
+                "https://qa-scooter.praktikum-services.ru/api/v1/courier/login",
+                data=login_payload
+            )
+
+            courier_id = login_response.json()["id"]
+
+            delete_response = requests.delete(
+                f"https://qa-scooter.praktikum-services.ru/api/v1/courier/{courier_id}"
+            )
+
+            assert delete_response.status_code == 200
+
+
+    @allure.title("Создание курьера без логина")
+    @allure.description("Проверка ошибки при отсутствии обязательного поля login")
+    def test_create_courier_without_login(self):
+
+        with allure.step("Генерация данных без login"):
+            letters = string.ascii_lowercase
+
+            password = ''.join(random.choice(letters) for _ in range(10))
+            first_name = ''.join(random.choice(letters) for _ in range(10))
+
+            payload = {
+                "password": password,
+                "firstName": first_name
+            }
+
+        with allure.step("Отправка запроса"):
+            response = requests.post(
+                "https://qa-scooter.praktikum-services.ru/api/v1/courier",
+                data=payload
+            )
+
+        with allure.step("Проверка ошибки"):
+            assert response.status_code == 400
+            assert response.json()["message"] == "Недостаточно данных для создания учетной записи"
+
+
+    @allure.title("Создание курьера без пароля")
+    @allure.description("Проверка ошибки при отсутствии обязательного поля password")
+    def test_create_courier_without_password(self):
+
+        with allure.step("Генерация данных без password"):
+            letters = string.ascii_lowercase
+
+            login = ''.join(random.choice(letters) for _ in range(10))
+            first_name = ''.join(random.choice(letters) for _ in range(10))
+
+            payload = {
+                "login": login,
+                "firstName": first_name
+            }
+
+        with allure.step("Отправка запроса"):
+            response = requests.post(
+                "https://qa-scooter.praktikum-services.ru/api/v1/courier",
+                data=payload
+            )
+
+        with allure.step("Проверка ошибки"):
+            assert response.status_code == 400
+            assert response.json()["message"] == "Недостаточно данных для создания учетной записи"
