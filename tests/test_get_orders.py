@@ -1,5 +1,6 @@
 import requests
 import allure
+from urls import ORDERS
 
 class TestGetOrders:
 
@@ -8,7 +9,7 @@ class TestGetOrders:
     def test_get_orders_returns_list(self):
         with allure.step("Отправка GET запроса"):
             response = requests.get(
-                "https://qa-scooter.praktikum-services.ru/api/v1/orders"
+                ORDERS
             )
 
         with allure.step("Проверка статуса"):

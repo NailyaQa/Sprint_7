@@ -2,106 +2,88 @@ import requests
 import random
 import string
 import allure
+from helpers.generator import generate_courier_data
+
+from urls import CREATE_COURIER
+from urls import LOGIN_COURIER
+
 
 
 class TestCreateCourier:
 
     @allure.title("Создание курьера")
-    @allure.description("Проверка успешного создания курьера и его удаления")
-    def test_create_courier_success(self):
+    @allure.description("Проверка успешного создания курьера ")
+    def test_create_courier_success(self, delete_courier):
 
         with allure.step("Генерация данных курьера"):
-            letters = string.ascii_lowercase
+            payload = generate_courier_data()
 
-            login = ''.join(random.choice(letters) for _ in range(10))
-            password = ''.join(random.choice(letters) for _ in range(10))
-            first_name = ''.join(random.choice(letters) for _ in range(10))
-
-            payload = {
-                "login": login,
-                "password": password,
-                "firstName": first_name
-            }
-
+            
         with allure.step("Создание курьера"):
             create_response = requests.post(
-                "https://qa-scooter.praktikum-services.ru/api/v1/courier",
+                CREATE_COURIER,
                 data=payload
             )
 
         with allure.step("Проверка успешного создания"):
             assert create_response.status_code == 201
-            assert create_response.json() == {"ok": True}
+            assert create_response.json()["ok"] is True
 
-        with allure.step("Авторизация курьера для получения id"):
+        
             login_payload = {
-                "login": login,
-                "password": password
+            "login": payload["login"],
+            "password": payload["password"]
             }
 
             login_response = requests.post(
-                "https://qa-scooter.praktikum-services.ru/api/v1/courier/login",
+                LOGIN_COURIER,
                 data=login_payload
             )
 
             courier_id = login_response.json()["id"]
 
-        with allure.step("Удаление курьера"):
-            delete_response = requests.delete(
-                f"https://qa-scooter.praktikum-services.ru/api/v1/courier/{courier_id}"
-            )
+        
+            delete_response = delete_courier(courier_id)
 
             assert delete_response.status_code == 200
 
 
     @allure.title("Нельзя создать дубликат курьера")
     @allure.description("Проверка ошибки при повторном создании курьера с теми же данными")
-    def test_create_duplicate_courier(self):
+    def test_create_duplicate_courier(self, delete_courier):
 
         with allure.step("Генерация данных курьера"):
-            letters = string.ascii_lowercase
-
-            login = ''.join(random.choice(letters) for _ in range(10))
-            password = ''.join(random.choice(letters) for _ in range(10))
-            first_name = ''.join(random.choice(letters) for _ in range(10))
-
-            payload = {
-                "login": login,
-                "password": password,
-                "firstName": first_name
-            }
+            payload = generate_courier_data()
 
         with allure.step("Первое создание курьера"):
             first_response = requests.post(
-                "https://qa-scooter.praktikum-services.ru/api/v1/courier",
+                CREATE_COURIER,
                 data=payload
             )
             assert first_response.status_code == 201
 
         with allure.step("Попытка создать дубликат"):
             second_response = requests.post(
-                "https://qa-scooter.praktikum-services.ru/api/v1/courier",
+                CREATE_COURIER,
                 data=payload
             )
 
             assert second_response.status_code == 409
 
-        with allure.step("Удаление тестового курьера"):
+       
             login_payload = {
-                "login": login,
-                "password": password
-            }
+            "login": payload["login"],
+            "password": payload["password"]
+        }
 
             login_response = requests.post(
-                "https://qa-scooter.praktikum-services.ru/api/v1/courier/login",
+                LOGIN_COURIER,
                 data=login_payload
             )
 
             courier_id = login_response.json()["id"]
 
-            delete_response = requests.delete(
-                f"https://qa-scooter.praktikum-services.ru/api/v1/courier/{courier_id}"
-            )
+            delete_response = delete_courier(courier_id)
 
             assert delete_response.status_code == 200
 
@@ -123,7 +105,7 @@ class TestCreateCourier:
 
         with allure.step("Отправка запроса"):
             response = requests.post(
-                "https://qa-scooter.praktikum-services.ru/api/v1/courier",
+                CREATE_COURIER,
                 data=payload
             )
 
@@ -149,7 +131,7 @@ class TestCreateCourier:
 
         with allure.step("Отправка запроса"):
             response = requests.post(
-                "https://qa-scooter.praktikum-services.ru/api/v1/courier",
+                CREATE_COURIER,
                 data=payload
             )
 

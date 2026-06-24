@@ -1,6 +1,8 @@
 import requests
 import pytest
 import allure
+from urls import ORDERS
+
 
 
 class TestCreateOrder:
@@ -30,7 +32,7 @@ class TestCreateOrder:
                 payload["color"] = color
 
             response = requests.post(
-                "https://qa-scooter.praktikum-services.ru/api/v1/orders",
+                ORDERS,
                 json=payload
             )
         

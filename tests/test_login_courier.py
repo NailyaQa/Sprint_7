@@ -3,6 +3,7 @@ import requests
 import random
 import string
 import allure
+from urls import LOGIN_COURIER
 
 class TestLoginCourier:
     @allure.title("Успешная авторизация курьера")
@@ -22,7 +23,7 @@ class TestLoginCourier:
             }
 
             response = requests.post(
-                "https://qa-scooter.praktikum-services.ru/api/v1/courier/login",
+                LOGIN_COURIER,
                 data=payload
             )
 
@@ -49,7 +50,7 @@ class TestLoginCourier:
             }
 
             response = requests.post(
-                "https://qa-scooter.praktikum-services.ru/api/v1/courier/login",
+                LOGIN_COURIER,
                 data=payload
             )
         with allure.step("Проверить сообщение об ошибке"):
@@ -75,7 +76,7 @@ class TestLoginCourier:
             }
 
             response = requests.post(
-                "https://qa-scooter.praktikum-services.ru/api/v1/courier/login",
+                LOGIN_COURIER,
                 data=payload
             )
         with allure.step("Проверить сообщение об ошибке"):
@@ -97,7 +98,7 @@ class TestLoginCourier:
             }
 
             response = requests.post(
-                "https://qa-scooter.praktikum-services.ru/api/v1/courier/login",
+                LOGIN_COURIER,
                 data=payload
             )
         with allure.step("Проверить сообщение об ошибке"):
@@ -118,7 +119,7 @@ class TestLoginCourier:
             }   
 
             response = requests.post(
-                "https://qa-scooter.praktikum-services.ru/api/v1/courier/login",
+                LOGIN_COURIER,
             data=payload
             )
         with allure.step("Проверить сообщение об ошибке"):
@@ -142,7 +143,7 @@ class TestLoginCourier:
                 }
         with allure.step("Отправить запрос на авторизацию"):
             response = requests.post(
-                    "https://qa-scooter.praktikum-services.ru/api/v1/courier/login",
+                    LOGIN_COURIER,
                     data=payload
                 )
         with allure.step("Проверить сообщение об ошибке"):
