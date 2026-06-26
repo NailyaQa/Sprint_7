@@ -122,9 +122,12 @@ class TestLoginCourier:
                 LOGIN_COURIER,
             data=payload
             )
+            #Тест реализован согласно документации. 
+            #На момент проверки сервис возвращает 504 вместо ожидаемого 400,
+            #что выглядит как проблема тестового стенда.
         with allure.step("Проверить сообщение об ошибке"):
-            assert response.status_code in [400, 500, 504]
-            #assert response.json()["message"] == "Недостаточно данных для входа"
+            assert response.status_code == 400
+            assert response.json()["message"] == "Недостаточно данных для входа"
 
     @allure.title("Авторизация несуществующего курьера")
     @allure.description("Проверка ошибки при попытке входа под несуществующим пользователем")

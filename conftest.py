@@ -1,15 +1,28 @@
 import pytest
 import requests
 
-from urls import CREATE_COURIER
+from urls import LOGIN_COURIER, CREATE_COURIER
 
 @pytest.fixture
 def delete_courier():
-    # фикстура возвращает функцию удаления
-    def _delete_courier(courier_id):
-        response = requests.delete(
-            f"{CREATE_COURIER}/{courier_id}"
-        )
-        return response
+    courier_data = {}
 
-    return _delete_courier
+    yield courier_data
+
+    if courier_data:
+        login_payload = {
+            "login": courier_data["login"],
+            "password": courier_data["password"]
+        }
+
+        login_response = requests.post(
+            LOGIN_COURIER,
+            data=login_payload
+        )
+
+        if login_response.status_code == 200:
+            courier_id = login_response.json()["id"]
+
+            requests.delete(
+                f"{CREATE_COURIER}/{courier_id}"
+            )

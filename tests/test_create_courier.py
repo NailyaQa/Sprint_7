@@ -25,28 +25,14 @@ class TestCreateCourier:
                 data=payload
             )
 
+            delete_courier["login"] = payload["login"]
+            delete_courier["password"] = payload["password"]
+
         with allure.step("Проверка успешного создания"):
             assert create_response.status_code == 201
             assert create_response.json()["ok"] is True
 
         
-            login_payload = {
-            "login": payload["login"],
-            "password": payload["password"]
-            }
-
-            login_response = requests.post(
-                LOGIN_COURIER,
-                data=login_payload
-            )
-
-            courier_id = login_response.json()["id"]
-
-        
-            delete_response = delete_courier(courier_id)
-
-            assert delete_response.status_code == 200
-
 
     @allure.title("Нельзя создать дубликат курьера")
     @allure.description("Проверка ошибки при повторном создании курьера с теми же данными")
@@ -62,30 +48,18 @@ class TestCreateCourier:
             )
             assert first_response.status_code == 201
 
+        # Сообщаем фикстуре, какого курьера удалить после завершения теста
+        delete_courier["login"] = payload["login"]
+        delete_courier["password"] = payload["password"]
+
         with allure.step("Попытка создать дубликат"):
             second_response = requests.post(
-                CREATE_COURIER,
-                data=payload
-            )
+            CREATE_COURIER,
+            data=payload
+        )
 
             assert second_response.status_code == 409
-
-       
-            login_payload = {
-            "login": payload["login"],
-            "password": payload["password"]
-        }
-
-            login_response = requests.post(
-                LOGIN_COURIER,
-                data=login_payload
-            )
-
-            courier_id = login_response.json()["id"]
-
-            delete_response = delete_courier(courier_id)
-
-            assert delete_response.status_code == 200
+            assert second_response.json()["message"] == "Этот логин уже используется. Попробуйте другой."
 
 
     @allure.title("Создание курьера без логина")
